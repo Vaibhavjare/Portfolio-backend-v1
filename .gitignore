@@ -1,7 +1,14 @@
-<<<<<<< HEAD
+# secrets
+credentials.json
+app/core/credentials.json
+.env
+
 # Virtual Environment
+.env
+credentials.json
+app/core/credentials.json
 venv/
-env/
+__pycache__/
 
 # Python
 __pycache__/
@@ -22,7 +29,6 @@ Thumbs.db
 
 # SQLite
 portfolio.db
-=======
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -230,4 +236,4 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
->>>>>>> 3c832e5b655dcb58596da1f4dbcba7a8f5d3efda
+app/core/credentials.json
