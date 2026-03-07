@@ -5,12 +5,19 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from app.core.config import settings
 
+from app.models.blog import Blog
+from app.models.blog import Blog
 from app.models.project_model import Project
 from app.models.skill import Skill
 from app.models.user_model import User
 from app.models.certification import Certificate
 from app.models.contact import Contact
-
+from app.models.experience import Experience
+from app.models.education import Education
+from app.models.achievement import Achievement
+from app.models.testimonial import Testimonial
+from app.models.blog import Blog
+from app.models.analytics import Analytics
 
 logger = logging.getLogger("portfolio-db")
 
@@ -44,6 +51,12 @@ async def init_db():
             User,
             Certificate,
             Contact,
+            Experience,
+            Education,
+            Achievement,
+            Testimonial,
+            Blog,
+            Analytics,
         ],
     )
 

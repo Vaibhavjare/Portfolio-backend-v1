@@ -84,4 +84,4 @@ async def delete_certificate(
     if not deleted:
         raise HTTPException(status_code=404, detail="Certificate not found")
 
-    return {"message": "Certificate deleted successfully"}
+    return {"message": "Certificate deleted successfully"}  

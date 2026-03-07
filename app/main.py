@@ -15,7 +15,12 @@ from app.routers.auth_router import router as auth_router
 from app.routers.certification_router import router as certificate_router
 from app.routers.contact_router import router as contact_router
 from app.routers.profile_router import router as profile_router
-
+from app.routers.experience_router import router as experience_router
+from app.routers.education_router import router as education_router
+from app.routers.achievement_router import router as achievement_router
+from app.routers.testimonial_router import router as testimonial_router
+from app.routers.blog_router import router as blog_router
+from app.routers.analytics_router import router as analytics_router
 
 # =========================================
 # Logging Configuration
@@ -85,8 +90,12 @@ app.include_router(project_router)
 app.include_router(skill_router)
 app.include_router(certificate_router)
 app.include_router(contact_router)
-
-
+app.include_router(experience_router)
+app.include_router(education_router)
+app.include_router(achievement_router)
+app.include_router(testimonial_router)
+app.include_router(blog_router)
+app.include_router(analytics_router)
 # =========================================
 # Root Endpoint
 # =========================================
