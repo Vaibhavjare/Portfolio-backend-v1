@@ -4,14 +4,31 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  backend-test:
+
     runs-on: ubuntu-latest
+
+    env:
+      # Secrets
+      MONGO_URL: ${{ secrets.MONGO_URL }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+
+      # Variables
+      DATABASE_NAME: ${{ vars.DATABASE_NAME }}
+      PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+      ALGORITHM: ${{ vars.ALGORITHM }}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${{ vars.ACCESS_TOKEN_EXPIRE_MINUTES }}
+      GOOGLE_CREDENTIALS_FILE: ${{ vars.GOOGLE_CREDENTIALS_FILE }}
 
     steps:
 
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Setup Python
@@ -24,6 +41,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Application Check
+      - name: Create Google Credentials File
+        run: |
+          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > app/core/credentials.json
+
+      - name: Verify Python Version
+        run: python --version
+
+      - name: Check Code Compilation
         run: |
           python -m compileall .
+
+      - name: Start FastAPI Server
+        run: |
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          sleep 6
+
+      - name: Test Health Endpoint
+        run: |
+          curl --fail http://127.0.0.1:8000/health
+
+      - name: Success Message
+        run: echo "Backend pipeline completed successfully 🚀"
