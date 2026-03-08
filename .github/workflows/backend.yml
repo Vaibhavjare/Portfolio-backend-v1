@@ -1,4 +1,4 @@
-name: Backend CI Pipeline
+name: Backend CI
 
 on:
   push:
@@ -7,63 +7,40 @@ on:
     branches: [ main ]
 
 jobs:
-
   backend-test:
-
     runs-on: ubuntu-latest
 
     env:
-      # Secrets
+      PROJECT_NAME: Portfolio Backend API
       MONGO_URL: ${{ secrets.MONGO_URL }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ALGORITHM: ${{ secrets.ALGORITHM }}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-
-      # Variables
-      DATABASE_NAME: ${{ vars.DATABASE_NAME }}
-      PROJECT_NAME: ${{ vars.PROJECT_NAME }}
-      ALGORITHM: ${{ vars.ALGORITHM }}
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${{ vars.ACCESS_TOKEN_EXPIRE_MINUTES }}
-      GOOGLE_CREDENTIALS_FILE: ${{ vars.GOOGLE_CREDENTIALS_FILE }}
 
     steps:
 
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
 
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Create Google Credentials File
-        run: |
-          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > app/core/credentials.json
-          ls app/core/
+    - name: Start FastAPI server
+      run: |
+        nohup uvicorn app.main:app --host 127.0.0.1 --port 8000 > server.log 2>&1 &
+        sleep 8
 
-      - name: Check Environment Variables
-        run: |
-          echo "DATABASE_NAME=$DATABASE_NAME"
-          echo "PROJECT_NAME=$PROJECT_NAME"
-          echo "ALGORITHM=$ALGORITHM"
+    - name: Show server logs
+      run: cat server.log
 
-      - name: Start FastAPI Server
-        run: |
-          uvicorn app.main:app --host 127.0.0.1 --port 8000 > server.log 2>&1 &
-          sleep 12
-
-      - name: Show Server Logs
-        run: |
-          cat server.log
-
-      - name: Check Running Processes
-        run: |
-          ps aux | grep uvicorn
-
-      - name: Test Health Endpoint
-        run: |
-          curl -v --retry 5 --retry-delay 5 http://127.0.0.1:8000/health
+    - name: Health check
+      run: curl --retry 5 --retry-delay 5 --fail http://127.0.0.1:8000/health
