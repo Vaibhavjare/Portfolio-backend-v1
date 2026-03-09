@@ -1,5 +1,6 @@
 import os
 import io
+import json
 from dotenv import load_dotenv
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -10,8 +11,27 @@ load_dotenv()
 
 GOOGLE_DRIVE_FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
 GOOGLE_CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE")
+GOOGLE_CREDENTIALS_JSON = os.getenv("GOOGLE_CREDENTIALS_JSON")
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
+
+# ==============================
+# CREATE credentials.json IF USING ENV JSON (Render / CI)
+# ==============================
+
+if GOOGLE_CREDENTIALS_JSON:
+    with open("credentials.json", "w") as f:
+        f.write(GOOGLE_CREDENTIALS_JSON)
+
+    GOOGLE_CREDENTIALS_FILE = "credentials.json"
+
+
+# ==============================
+# LOAD GOOGLE DRIVE CREDENTIALS
+# ==============================
+
+if not GOOGLE_CREDENTIALS_FILE:
+    raise Exception("Google credentials not configured")
 
 credentials = service_account.Credentials.from_service_account_file(
     GOOGLE_CREDENTIALS_FILE,
@@ -24,6 +44,7 @@ drive_service = build("drive", "v3", credentials=credentials)
 # ==============================
 # CREATE SUBFOLDER IF NOT EXISTS
 # ==============================
+
 def get_or_create_subfolder(folder_name: str):
 
     query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and '{GOOGLE_DRIVE_FOLDER_ID}' in parents and trashed=false"
@@ -51,6 +72,7 @@ def get_or_create_subfolder(folder_name: str):
 # ==============================
 # UPLOAD FILE TO SUBFOLDER
 # ==============================
+
 async def upload_file_to_drive(file, filename: str, subfolder: str):
 
     try:
